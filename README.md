@@ -6,7 +6,7 @@ Live app: https://aayush-jhawar.github.io/batchproof/
 
 ## Why I made this
 
-Last month our Formula Bharat team at IIT Kanpur needed aluminium sheet in a hurry. We picked sellers off IndiaMART and JustDial, told them the size, thickness and that we wanted good quality, and paid. The sheet failed our 3-point bend test. The replacement took a week, nobody refunded us, and it came from the same kind of listing, so it was just as much of a gamble.
+Last year, our Formula Student EV team at IIT Kanpur needed aluminum sheet in a hurry. We picked sellers from IndiaMART and JustDial, told them the size and thickness, said we wanted good quality, and paid. The sheet failed our 3-point bend test. The replacement took a week, nobody refunded us, and it came from the same kind of listing, so it was just as much of a gamble.
 
 Looking back, the sites' star ratings told us whether a seller replied and shipped, not whether the metal was any good. And half the numbers we called were dead or never picked up, so whatever we figured out about sellers was gone by the next order.
 
@@ -14,10 +14,10 @@ BatchProof doesn't sell anything or list sellers. It just makes you do the few t
 
 ## How it works
 
-1. **Spec.** Write down exactly what you need: material, grade, temper, thickness and tolerance, size, quantity, deadline, payment terms, and whether you want the mill test certificate (MTC). If you leave out the temper, skip the MTC or pay everything upfront, it tells you.
+1. **Spec.** Write down exactly what you need: material, grade, temper, thickness and tolerance, size, quantity, deadline, payment terms, and whether you want the mill test certificate (MTC). If you leave out the temper, skip the MTC, or pay everything upfront, it tells you.
 2. **Ask sellers.** You get one message with the full spec to send every seller on WhatsApp. Tick off who replied, who confirmed the grade and temper in writing, and who sent the MTC. It shows which quote is the safest bet, and why the cheapest one might not be.
 3. **Check the delivery.** When the sheet arrives, measure the thickness at 5 points (it compares against your tolerance), check the grade marking and the MTC, look it over, add the test result, and accept or reject it.
-4. **Seller record.** Every order adds to a running record of who passed, who failed and who stopped replying. If you pick a seller who failed you before, you'll see it.
+4. **Seller record.** Every order adds to a running record of who passed, who failed, and who stopped replying. If you pick a seller who failed you before, you'll see it.
 
 It opens with sample data from our sheet order. The seller names and numbers in it are made up.
 
