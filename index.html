@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BatchProof – buy material that passes the test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f3ef; --card:#ffffff; --ink:#1d1f21; --muted:#6b6f73; --line:#dedbd3;
+    --accent:#1f5f8b; --accent-soft:#e3eef6;
+    --ok:#22794a; --ok-soft:#e2f2e8; --bad:#b3261e; --bad-soft:#fbe6e4; --warn:#9a5b00; --warn-soft:#fdf0d9;
+    --r:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "IBM Plex Sans",system-ui,sans-serif}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  header{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;letter-spacing:.2px}
+  header .tag{color:#b8bcc0;font-size:13px}
+  nav{display:flex;gap:4px;margin-left:auto}
+  nav button{background:transparent;color:#cfd3d6;border:1px solid transparent;padding:6px 12px;border-radius:8px;font:inherit;cursor:pointer}
+  nav button.on{background:#ffffff1a;color:#fff;border-color:#ffffff33}
+  main{max-width:880px;margin:0 auto;padding:18px 14px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+  h2{font-size:17px;margin:0 0 10px}
+  h3{font-size:15px;margin:0 0 8px}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .btn.plain{background:#eceae4;color:var(--ink)}
+  .btn.danger{background:var(--bad)}
+  .btn.sm{padding:5px 10px;font-size:13px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+  input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid #c9c5bb;border-radius:8px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  input.err{border-color:var(--bad);background:var(--bad-soft)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .field-err{color:var(--bad);font-size:12px;margin-top:3px}
+  .check{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:14px;margin:6px 0}
+  .check input{width:auto;margin-top:3px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .p-ok{background:var(--ok-soft);color:var(--ok)} .p-bad{background:var(--bad-soft);color:var(--bad)}
+  .p-warn{background:var(--warn-soft);color:var(--warn)} .p-info{background:var(--accent-soft);color:var(--accent)}
+  .p-mute{background:#eceae4;color:var(--muted)}
+  .note{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 12px;border-radius:6px;font-size:14px;margin:10px 0}
+  .note.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .note.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .note.info{border-color:var(--accent);background:var(--accent-soft)}
+  .steps{display:flex;gap:6px;margin:6px 0 14px;flex-wrap:wrap}
+  .step{flex:1;min-width:120px;padding:8px 10px;border-radius:8px;background:#eceae4;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;border:2px solid transparent}
+  .step.done{background:var(--ok-soft);color:var(--ok)}
+  .step.cur{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+  .step.locked{cursor:not-allowed;opacity:.6}
+  .order{display:flex;gap:12px;align-items:center;cursor:pointer}
+  .order:hover{border-color:#b9b4a8}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  pre.msg{white-space:pre-wrap;background:#f8f7f3;border:1px dashed #c9c5bb;padding:12px;border-radius:8px;font:13px/1.5 "IBM Plex Mono",monospace;margin:0}
+  .quote{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px}
+  .quote.chosen{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok-soft)}
+  .toggles{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+  .toggles label{display:flex;gap:6px;align-items:center;font-weight:500;margin:0}
+  .toggles input{width:auto}
+  .reading{display:flex;flex-direction:column;gap:3px}
+  .reading input{text-align:center}
+  .readings{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .empty{text-align:center;padding:30px 10px;color:var(--muted)}
+  .modal-bg{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal{background:#fff;border-radius:12px;max-width:440px;width:100%;padding:18px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;z-index:60}
+  .verdict{font-size:16px;font-weight:700}
+  a{color:var(--accent)}
+  @media (max-width:560px){ .readings{grid-template-columns:repeat(3,1fr)} nav{margin-left:0;width:100%} }
+</style>
+</head>
+<body>
+<header>
+  <h1>BatchProof</h1>
+  <span class="tag">Buy raw material that passes the test, the first time.</span>
+  <nav>
+    <button id="nav-orders" class="on">Purchases</button>
+    <button id="nav-sellers">Sellers</button>
+  </nav>
+</header>
+<main id="app"></main>
+<div id="modal-root"></div>
+
+<script>
+/* ---------- storage (safe) ---------- */
+const KEY = 'batchproof.v1';
+let memoryStore = null;
+function load(){
+  try { const s = localStorage.getItem(KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return memoryStore;
+}
+function save(){
+  memoryStore = state;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+/* ---------- helpers ---------- */
+const uid = () => Math.random().toString(36).slice(2,9);
+const today = () => new Date().toISOString().slice(0,10);
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = s => { if(!s) return '—'; const d = new Date(s+'T00:00:00'); return isNaN(d) ? s : d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}); };
+const ageDays = s => { const d=new Date(s+'T00:00:00'); return isNaN(d)?0:Math.floor((Date.now()-d)/86400000); };
+const num = v => { if (v === '' || v === null || v === undefined) return NaN; return Number(String(v).replace(',', '.')); };
+function toast(t){ const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(),1800); }
+function digits(p){ return String(p||'').replace(/\D/g,''); }
+function waPhone(p){ let d = digits(p); if (d.length===10) d = '91'+d; if (d.length===11 && d[0]==='0') d = '91'+d.slice(1); return d; }
+function validPhone(p){ const d = digits(p); return d.length===10 || (d.length===12 && d.startsWith('91')) || (d.length===11 && d[0]==='0'); }
+
+const MATERIALS = {
+  'Aluminium sheet': {grades:['6061','6063','5052','1100','Other'], tempers:['T6','T651','O','H32','H14','Other','Not sure']},
+  'Aluminium tube':  {grades:['6061','6063','Other'], tempers:['T6','T4','Other','Not sure']},
+  'Aluminium rod':   {grades:['6061','7075','6063','Other'], tempers:['T6','T651','Other','Not sure']},
+  'Steel tube (CDS/ERW)': {grades:['AISI 4130','AISI 1018','IS 1239','Other'], tempers:['Normalised','As drawn','Other','Not sure']},
+  'Other': {grades:['Other'], tempers:['Other','Not sure']}
+};
+
+/* ---------- sample data ---------- */
+function seed(){
+  const s1={id:'s1',name:'Shree Metals (sample)',phone:'9800000001',source:'JustDial',city:'Kanpur',addedAt:daysAgo(40)};
+  const s2={id:'s2',name:'Ganga Alloys (sample)',phone:'9800000002',source:'IndiaMART',city:'Lucknow',addedAt:daysAgo(40)};
+  const s3={id:'s3',name:'National Aluminium Traders (sample)',phone:'9800000003',source:'IndiaMART',city:'Delhi',addedAt:daysAgo(40)};
+  const s4={id:'s4',name:'Patel Sheet House (sample)',phone:'9800000004',source:'Market visit',city:'Kanpur',addedAt:daysAgo(5)};
+  return {
+    seeded:true,
+    sellers:[s1,s2,s3,s4],
+    orders:[
+      { id:'o1', title:'Floor pan sheet – batch 1', material:'Aluminium sheet', grade:'6061', temper:'Not sure',
+        thickness:'2', tol:'0.1', size:'1220 × 2440 mm', qty:'2 sheets', needBy:daysAgo(30), mtc:false, pay:'Full advance',
+        createdAt:daysAgo(38), status:'done', chosen:'s1',
+        quotes:[
+          {sellerId:'s1',sentAt:daysAgo(38),responded:true,specOk:false,mtcShared:false,price:'9200',lead:'3'},
+          {sellerId:'s2',sentAt:daysAgo(38),responded:false,specOk:false,mtcShared:false,price:'',lead:''},
+          {sellerId:'s3',sentAt:daysAgo(38),responded:false,specOk:false,mtcShared:false,price:'',lead:''}
+        ],
+        check:{readings:['1.98','1.84','1.95','1.80','1.97'],marked:false,mtcMatch:false,visual:true,test:'fail',outcome:'rejected',decidedAt:daysAgo(31),note:'Failed 3-point bend test. No refund given.'}
+      },
+      { id:'o2', title:'Floor pan sheet – replacement', material:'Aluminium sheet', grade:'6061', temper:'T6',
+        thickness:'2', tol:'0.1', size:'1220 × 2440 mm', qty:'2 sheets', needBy:daysAgo(-6), mtc:true, pay:'Pay after inspection',
+        createdAt:daysAgo(2), status:'inquiry', chosen:null,
+        quotes:[
+          {sellerId:'s2',sentAt:daysAgo(2),responded:false,specOk:false,mtcShared:false,price:'',lead:''},
+          {sellerId:'s3',sentAt:daysAgo(2),responded:true,specOk:true,mtcShared:true,price:'10400',lead:'4'},
+          {sellerId:'s4',sentAt:daysAgo(1),responded:true,specOk:true,mtcShared:false,price:'9600',lead:'2'}
+        ],
+        check:null
+      }
+    ]
+  };
+}
+
+let state = load() || seed();
+save();
+let view = {page:'orders', orderId:null, step:null};
+
+/* ---------- derived ---------- */
+function gradeOf(o){ return o.grade==='Other' ? (o.gradeOther||'').trim() : o.grade; }
+function temperOf(o){ if (o.temper==='Other') return (o.temperOther||'').trim(); return o.temper==='Not sure' ? '' : (o.temper||''); }
+function specLabel(o){ const g=gradeOf(o)||'grade?'; const t=temperOf(o); return esc(g)+(t?'-'+esc(t):''); }
+const sellerById = id => state.sellers.find(s=>s.id===id);
+function sellerStats(id){
+  let asked=0, replied=0, lastReply=null, lastAsked=null, passed=0, failed=0, unanswered=[];
+  const sorted = [...state.orders].sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  for (const o of sorted){
+    for (const q of o.quotes){
+      if (q.sellerId!==id) continue;
+      asked++; lastAsked = q.sentAt;
+      if (q.responded){ replied++; lastReply = q.sentAt; unanswered.push(false); }
+      else if (ageDays(q.sentAt) >= 2) unanswered.push(true);
+    }
+    if (o.chosen===id && o.check && o.check.outcome){ if (o.check.outcome==='accepted') passed++; else failed++; }
+  }
+  // consecutive non-replies at the end
+  let streak=0; for (let i=unanswered.length-1;i>=0 && unanswered[i];i--) streak++;
+  return {asked,replied,lastReply,lastAsked,passed,failed,noReplyStreak:streak};
+}
+function sellerBadges(id){
+  const st = sellerStats(id); const out=[];
+  if (st.failed) out.push(`<span class="pill p-bad">Failed ${st.failed} batch${st.failed>1?'es':''}</span>`);
+  if (st.passed) out.push(`<span class="pill p-ok">Passed ${st.passed}</span>`);
+  if (st.noReplyStreak>=2) out.push(`<span class="pill p-warn">No reply last ${st.noReplyStreak} times – number may be dead</span>`);
+  if (!st.asked) out.push(`<span class="pill p-mute">Never contacted</span>`);
+  else out.push(`<span class="pill p-mute">Replied ${st.replied}/${st.asked}</span>`);
+  return out.join(' ');
+}
+function specRisks(o){
+  const r=[];
+  if (!temperOf(o)) r.push('Temper is not specified. A seller can ship softer stock and still call it "6061".');
+  if (!o.mtc) r.push('No mill test certificate (MTC) asked for. You will only find out at testing.');
+  if (o.pay==='Full advance') r.push('Full advance payment. If the batch fails, you have no leverage for a refund.');
+  return r;
+}
+function stepState(o){
+  return {
+    spec: true,
+    inquiry: true,
+    check: !!o.chosen
+  };
+}
+
+/* ---------- message ---------- */
+function buildMessage(o){
+  const lines = [
+    `Hello, we need the following material. Please confirm each point in writing before we place the order.`,
+    ``,
+    `Material: ${o.material}`,
+    `Grade: ${gradeOf(o) || '—'}${temperOf(o) ? '-'+temperOf(o) : ''}`,
+    `Temper: ${temperOf(o) || '(please tell us what temper you can supply)'}`,
+    `Thickness: ${o.thickness} mm (tolerance ±${o.tol || '?'} mm)`,
+    `Size: ${o.size || '—'}`,
+    `Quantity: ${o.qty || '—'}`,
+    o.needBy ? `Needed by: ${fmtDate(o.needBy)}` : null,
+    ``,
+    o.mtc ? `Please share the mill test certificate (MTC) for this exact batch BEFORE dispatch. We will match the heat number on the material.` : null,
+    o.pay==='Pay after inspection' ? `Payment: after we inspect the material on arrival.` :
+      o.pay==='Part advance' ? `Payment: part advance, balance after inspection on arrival.` : null,
+    ``,
+    `Please reply with price, delivery time, and confirmation of grade/temper.`
+  ];
+  return lines.filter(l=>l!==null).join('\n');
+}
+
+/* ---------- render: orders list ---------- */
+function renderOrders(){
+  const active = state.orders.filter(o=>o.status!=='done');
+  const done = state.orders.filter(o=>o.status==='done');
+  const item = o => {
+    const label = o.status==='done' ? (o.check?.outcome==='accepted' ? '<span class="pill p-ok">Accepted</span>' : '<span class="pill p-bad">Rejected</span>')
+      : o.status==='check' ? '<span class="pill p-info">Waiting for delivery check</span>' : '<span class="pill p-info">Asking sellers</span>';
+    const risks = specRisks(o).length && o.status!=='done' ? `<span class="pill p-warn">${specRisks(o).length} spec risk${specRisks(o).length>1?'s':''}</span>` : '';
+    return `<div class="card order" data-open="${o.id}">
+      <div class="grow"><div style="font-weight:600">${esc(o.title)}</div>
+      <div class="small muted">${esc(o.material)} · ${specLabel(o)} · ${esc(o.thickness)} mm · ${esc(o.qty)}</div></div>
+      <div class="row" style="justify-content:flex-end">${risks} ${label}</div></div>`;
+  };
+  return `
+  ${state.seeded ? `<div class="note info small">This app is loaded with <b>sample data</b> based on our team's aluminium sheet order. Seller names and numbers are made up. <b>Try:</b> open "Floor pan sheet – replacement", compare the quotes, choose a seller, then run the delivery check. <a href="#" id="clear-sample">Start empty</a></div>` : ''}
+  <div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">Purchases</h2><button class="btn" id="new-order">+ New purchase</button></div>
+  ${active.length ? active.map(item).join('') : `<div class="card empty">No open purchases.<br><span class="small">Start one when someone on the team needs material.</span></div>`}
+  ${done.length ? `<h3 style="margin-top:20px">Closed</h3>${done.map(item).join('')}` : ''}`;
+}
+
+/* ---------- render: new / spec form ---------- */
+function specForm(o, isNew){
+  const m = MATERIALS[o.material] || MATERIALS['Other'];
+  const opt = (arr, v) => arr.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+  return `
+  <div class="card">
+    <h2>${isNew ? 'New purchase: write the exact spec' : 'Spec'}</h2>
+    <p class="small muted" style="margin-top:-4px">Every seller gets this same spec in writing. Vague words like "good quality" don't count.</p>
+    <div class="grid">
+      <div style="grid-column:1/-1"><label>What is it for?</label><input id="f-title" value="${esc(o.title)}" placeholder="e.g. Floor pan sheet"><div class="field-err" id="e-title"></div></div>
+      <div><label>Material</label><select id="f-material">${opt(Object.keys(MATERIALS), o.material)}</select></div>
+      <div><label>Grade / alloy</label><select id="f-grade">${opt(m.grades, o.grade)}</select>
+        <input id="f-grade-other" placeholder="Type the grade, e.g. AISI 304" value="${esc(o.gradeOther||'')}" style="margin-top:6px;${o.grade==='Other'?'':'display:none'}"><div class="field-err" id="e-grade"></div></div>
+      <div><label>Temper</label><select id="f-temper">${opt(m.tempers, o.temper)}</select>
+        <input id="f-temper-other" placeholder="Type the temper" value="${esc(o.temperOther||'')}" style="margin-top:6px;${o.temper==='Other'?'':'display:none'}"></div>
+      <div><label>Thickness (mm)</label><input id="f-thickness" inputmode="decimal" value="${esc(o.thickness)}" placeholder="2"><div class="field-err" id="e-thickness"></div></div>
+      <div><label>Tolerance ± (mm)</label><input id="f-tol" inputmode="decimal" value="${esc(o.tol)}" placeholder="0.1"><div class="field-err" id="e-tol"></div></div>
+      <div><label>Size</label><input id="f-size" value="${esc(o.size)}" placeholder="1220 × 2440 mm"></div>
+      <div><label>Quantity</label><input id="f-qty" value="${esc(o.qty)}" placeholder="2 sheets"></div>
+      <div><label>Needed by</label><input id="f-needby" type="date" value="${esc(o.needBy)}"></div>
+      <div><label>Payment terms</label><select id="f-pay">${opt(['Pay after inspection','Part advance','Full advance'], o.pay)}</select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="f-mtc" ${o.mtc?'checked':''}> Ask for the mill test certificate (MTC) before dispatch</label>
+    <div id="risk-box"></div>
+    <div class="row" style="margin-top:10px">
+      ${isNew ? `<button class="btn plain" id="cancel-new">Cancel</button>` : ''}
+      <button class="btn" id="save-spec">${isNew ? 'Save spec and ask sellers →' : 'Save spec'}</button>
+    </div>
+  </div>`;
+}
+function readSpecForm(){
+  const g = id => document.getElementById(id);
+  return { title:g('f-title').value.trim(), material:g('f-material').value, grade:g('f-grade').value, temper:g('f-temper').value,
+    thickness:g('f-thickness').value.trim(), tol:g('f-tol').value.trim(), size:g('f-size').value.trim(), qty:g('f-qty').value.trim(),
+    needBy:g('f-needby').value, pay:g('f-pay').value, mtc:g('f-mtc').checked,
+    gradeOther:g('f-grade-other').value.trim(), temperOther:g('f-temper-other').value.trim() };
+}
+function validateSpec(f){
+  const e={};
+  if (f.grade==='Other' && !f.gradeOther) e.grade='Type the grade. "Other" alone tells the seller nothing.';
+  if (!f.title) e.title='Give it a short name so the team knows what this is for.';
+  const t=num(f.thickness); if (isNaN(t) || t<=0 || t>200) e.thickness='Enter a thickness in mm, e.g. 2';
+  const tol=num(f.tol); if (isNaN(tol) || tol<0 || tol>=(isNaN(t)?Infinity:t)) e.tol='Enter a tolerance in mm, e.g. 0.1';
+  return e;
+}
+function renderRisks(f){
+  const box=document.getElementById('risk-box'); if(!box) return;
+  const r=specRisks(f);
+  box.innerHTML = r.length ? `<div class="note"><b>This spec has the same gaps that let a bad batch through:</b><ul style="margin:6px 0 0 18px;padding:0">${r.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`
+    : `<div class="note ok small">Spec is tight: grade, temper, MTC and payment after inspection are all set.</div>`;
+}
+
+/* ---------- render: order detail ---------- */
+function renderOrder(){
+  const o = state.orders.find(x=>x.id===view.orderId);
+  if (!o){ view={page:'orders'}; return renderOrders(); }
+  const ss=stepState(o);
+  const step = view.step || (o.status==='done'||o.status==='check' ? 'check' : 'inquiry');
+  view.step = step;
+  const stepEl=(k,label,n)=>{
+    const done = (k==='spec') || (k==='inquiry' && !!o.chosen) || (k==='check' && o.status==='done');
+    const locked = !ss[k];
+    return `<div class="step ${done?'done':''} ${step===k?'cur':''} ${locked?'locked':''}" data-step="${k}" title="${locked?'Choose a seller first':''}">${n}. ${label}${done?' ✓':''}</div>`;
+  };
+  let body='';
+  if (step==='spec') body = o.status==='done'
+    ? `<div class="card"><h2>Spec</h2><div class="note info small">This purchase is closed, so its spec is locked. It's the record of what was asked for.</div><pre class="msg">${esc(buildMessage(o))}</pre></div>`
+    : specForm(o,false);
+  if (step==='inquiry') body = inquiryView(o);
+  if (step==='check') body = ss.check ? checkView(o) : `<div class="card empty">Choose a seller in step 2 first.</div>`;
+  return `
+  <div class="row" style="margin-bottom:6px"><button class="btn plain sm" id="back">← Purchases</button><div class="grow"></div>
+    <button class="btn plain sm" id="del-order">Delete</button></div>
+  <h2 style="margin:6px 0 2px">${esc(o.title)}</h2>
+  <div class="small muted">${esc(o.material)} · ${specLabel(o)} · ${esc(o.thickness)} ± ${esc(o.tol)} mm · ${esc(o.qty)} · needed by ${fmtDate(o.needBy)}</div>
+  <div class="steps">${stepEl('spec','Spec',1)}${stepEl('inquiry','Ask sellers',2)}${stepEl('check','Check delivery',3)}</div>
+  ${body}`;
+}
+
+function inquiryView(o){
+  const msg = buildMessage(o);
+  const risks = specRisks(o);
+  const inOrder = new Set(o.quotes.map(q=>q.sellerId));
+  const others = state.sellers.filter(s=>!inOrder.has(s.id));
+  const quotes = o.quotes.map((q,i)=>{
+    const s = sellerById(q.sellerId); if(!s) return '';
+    const chosen = o.chosen===s.id;
+    const wa = `https://wa.me/${waPhone(s.phone)}?text=${encodeURIComponent(msg)}`;
+    const locked = o.status==='done';
+    return `<div class="quote ${chosen?'chosen':''}">
+      <div class="row"><div class="grow"><b>${esc(s.name)}</b> <span class="small muted">· ${esc(s.source)}${s.city?' · '+esc(s.city):''} · <span class="mono">${esc(s.phone)}</span></span></div>
+      ${chosen?'<span class="pill p-ok">Chosen</span>':''}</div>
+      <div style="margin:6px 0">${sellerBadges(s.id)}</div>
+      <div class="toggles">
+        <label><input type="checkbox" data-q="${i}" data-k="responded" ${q.responded?'checked':''} ${locked?'disabled':''}> Replied</label>
+        <label><input type="checkbox" data-q="${i}" data-k="specOk" ${q.specOk?'checked':''} ${locked?'disabled':''}> Confirmed grade & temper in writing</label>
+        <label><input type="checkbox" data-q="${i}" data-k="mtcShared" ${q.mtcShared?'checked':''} ${locked?'disabled':''}> Sent MTC</label>
+      </div>
+      <div class="row">
+        <div style="width:130px"><label>Price (₹)</label><input data-q="${i}" data-k="price" inputmode="numeric" value="${esc(q.price)}" ${locked?'disabled':''}></div>
+        <div style="width:110px"><label>Days to deliver</label><input data-q="${i}" data-k="lead" inputmode="numeric" value="${esc(q.lead)}" ${locked?'disabled':''}></div>
+        <div class="grow"></div>
+        ${locked?'':`<a class="btn ghost sm" href="${wa}" target="_blank" rel="noopener">Send on WhatsApp</a>
+        <button class="btn plain sm" data-remove-q="${i}">Remove</button>
+        ${chosen?'':`<button class="btn sm" data-choose="${s.id}">Choose</button>`}`}
+      </div>
+    </div>`;
+  }).join('');
+  return `
+  ${risks.length && o.status!=='done' ? `<div class="note"><b>${risks.length} gap${risks.length>1?'s':''} in this spec.</b> ${risks.map(esc).join(' ')} <a href="#" data-step-link="spec">Fix spec</a></div>`:''}
+  ${o.quotes.some(q=>q.responded) ? compareCard(o) : ''}
+  <div class="card">
+    <div class="row"><h3 class="grow" style="margin:0">Message to send every seller</h3><button class="btn sm" id="copy-msg">Copy message</button></div>
+    <p class="small muted">Same words to every seller, so you can compare who actually commits to the spec.</p>
+    <pre class="msg" id="msg">${esc(msg)}</pre>
+  </div>
+  ${o.quotes.some(q=>q.responded) ? '' : compareCard(o)}
+  <div class="card">
+    <h3>Sellers asked (${o.quotes.length})</h3>
+    ${o.quotes.length ? quotes : `<div class="empty small">No sellers added yet. Add at least 3, because many listed numbers don't reply.</div>`}
+    ${o.status==='done' ? '' : `
+    <div style="border-top:1px solid var(--line);padding-top:12px;margin-top:6px">
+      <b class="small">Add a seller</b>
+      ${others.length ? `<div class="row" style="margin:8px 0"><select id="pick-seller" class="grow">${others.map(s=>{const st=sellerStats(s.id);return `<option value="${s.id}">${esc(s.name)}${st.failed?' – failed before':''}${st.passed?' – passed before':''}</option>`;}).join('')}</select><button class="btn plain sm" id="add-existing">Add</button></div><div class="small muted">or a new one:</div>`:''}
+      <div class="grid" style="margin-top:6px">
+        <div><label>Name</label><input id="n-name" placeholder="Seller / shop name"></div>
+        <div><label>Phone</label><input id="n-phone" inputmode="tel" placeholder="10-digit mobile"></div>
+        <div><label>Found on</label><select id="n-source"><option>IndiaMART</option><option>JustDial</option><option>Market visit</option><option>Senior / other team</option><option>Other</option></select></div>
+        <div><label>City</label><input id="n-city" placeholder="optional"></div>
+      </div>
+      <div class="field-err" id="e-new"></div>
+      <button class="btn plain sm" id="add-new" style="margin-top:8px">Add new seller</button>
+    </div>`}
+  </div>`;
+}
+
+function compareCard(o){
+  if (o.quotes.length < 2) return '';
+  const rows = o.quotes.map(q=>({q,s:sellerById(q.sellerId),st:sellerStats(q.sellerId)})).filter(r=>r.s);
+  const safe = r => r.q.specOk && (!o.mtc || r.q.mtcShared) && !r.st.failed;
+  const priced = rows.filter(r=>r.q.price);
+  const safeP = priced.filter(safe).sort((a,b)=>(+a.q.price)-(+b.q.price));
+  const cheapest = [...priced].sort((a,b)=>(+a.q.price)-(+b.q.price))[0];
+  let pick = '';
+  if (safeP.length){
+    const best=safeP[0];
+    pick = `<div class="note ok small"><b>Safest quote: ${esc(best.s.name)}</b>, ₹${esc(best.q.price)}${best.q.lead?`, ${esc(best.q.lead)} days`:''}. Spec confirmed${o.mtc?', MTC sent':''}, no failures on record.`;
+    if (cheapest && cheapest!==best && !safe(cheapest)) pick += ` ${esc(cheapest.s.name)} is ₹${(+best.q.price)-(+cheapest.q.price)} cheaper but ${!cheapest.q.specOk?'hasn\'t confirmed the spec':cheapest.st.failed?'failed a batch before':'hasn\'t sent the MTC'}.`;
+    pick += `</div>`;
+  } else pick = `<div class="note small">No seller has confirmed the spec${o.mtc?' and sent the MTC':''} yet. Chase them, or add more sellers.</div>`;
+  const yn = b => b ? '<span class="pill p-ok">Yes</span>' : '<span class="pill p-mute">No</span>';
+  return `<div class="card"><h3>Compare</h3>${pick}
+    <div style="overflow-x:auto"><table><thead><tr><th>Seller</th><th>Replied</th><th>Spec</th><th>MTC</th><th>₹</th><th>Days</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${esc(r.s.name)}${r.st.failed?' <span class="pill p-bad">failed before</span>':''}</td><td>${yn(r.q.responded)}</td><td>${yn(r.q.specOk)}</td><td>${yn(r.q.mtcShared)}</td><td>${esc(r.q.price||'—')}</td><td>${esc(r.q.lead||'—')}</td></tr>`).join('')}
+    </tbody></table></div></div>`;
+}
+
+function checkView(o){
+  const s = sellerById(o.chosen);
+  const c = o.check || {readings:['','','','',''],marked:false,mtcMatch:false,visual:false,test:'pending',outcome:null,note:''};
+  const t=num(o.thickness), tol=num(o.tol);
+  const locked = o.status==='done';
+  const rd = c.readings.map((v,i)=>{
+    const n=num(v); let cls='', tag='';
+    if (v!=='' && !isNaN(n)){ const ok = Math.abs(n-t) <= tol + 1e-9; tag = ok?'<span class="pill p-ok">OK</span>':'<span class="pill p-bad">Out</span>'; }
+    else if (v!=='') { cls='err'; tag='<span class="pill p-bad">?</span>'; }
+    return `<div class="reading"><label class="small">Point ${i+1}</label><input class="${cls}" data-read="${i}" inputmode="decimal" value="${esc(v)}" placeholder="${esc(o.thickness)}" ${locked?'disabled':''}>${tag}</div>`;
+  }).join('');
+  const v = verdict(o,c);
+  return `
+  <div class="card">
+    <h3>Delivery check: ${esc(s?s.name:'')}</h3>
+    <p class="small muted">Do this before anyone cuts the sheet. Rejecting now is cheap; rejecting after machining costs you the week.</p>
+    <b class="small">Thickness at 5 points (mm). Spec: ${esc(o.thickness)} ± ${esc(o.tol)}</b>
+    <div class="readings" style="margin:8px 0 12px">${rd}</div>
+    <label class="check"><input type="checkbox" data-c="marked" ${c.marked?'checked':''} ${locked?'disabled':''}> Grade/temper is stamped or printed on the material</label>
+    <label class="check"><input type="checkbox" data-c="mtcMatch" ${c.mtcMatch?'checked':''} ${locked?'disabled':''}> MTC grade, temper and heat number match the material ${o.mtc?'':'<span class="pill p-warn">no MTC was asked for</span>'}</label>
+    <label class="check"><input type="checkbox" data-c="visual" ${c.visual?'checked':''} ${locked?'disabled':''}> No dents, scratches, corrosion or warping</label>
+    <div class="row" style="margin-top:8px"><div style="width:240px"><label>Test result (e.g. 3-point bend)</label>
+      <select data-c="test" ${locked?'disabled':''}>
+        <option value="pending" ${c.test==='pending'?'selected':''}>Not tested yet</option>
+        <option value="pass" ${c.test==='pass'?'selected':''}>Passed</option>
+        <option value="fail" ${c.test==='fail'?'selected':''}>Failed</option></select></div></div>
+    <div style="margin-top:10px"><label>Note</label><input data-c="note" value="${esc(c.note)}" placeholder="e.g. readings low on one edge" ${locked?'disabled':''}></div>
+  </div>
+  <div class="card">
+    <div class="verdict" style="color:${v.color}">${v.title}</div>
+    <div class="small" style="margin:4px 0 10px">${v.detail}</div>
+    ${locked ? `<div class="note ${c.outcome==='accepted'?'ok':'bad'} small">Closed on ${fmtDate(c.decidedAt)}: batch <b>${c.outcome}</b>. This is saved to ${esc(s?s.name:'the seller')}'s record.</div>
+      <button class="btn plain sm" id="reopen">Reopen</button>` :
+    `<div class="row"><button class="btn danger" id="reject" ${v.canDecide?'':'disabled'}>Reject batch</button>
+      <button class="btn" id="accept" ${v.canAccept?'':'disabled'}>Accept batch</button></div>
+      ${v.canDecide?'':'<div class="small muted" style="margin-top:6px">Enter all 5 readings to decide.</div>'}`}
+  </div>`;
+}
+function verdict(o,c){
+  const t=num(o.thickness), tol=num(o.tol);
+  const vals = c.readings.map(num);
+  const filled = vals.filter(x=>!isNaN(x)).length;
+  const bad = c.readings.some(r=>r!=='' && isNaN(num(r)));
+  const out = vals.filter(x=>!isNaN(x) && Math.abs(x-t) > tol + 1e-9).length;
+  if (c.test==='fail') return {title:'Reject: failed the test',detail:'Raise it with the seller with photos and readings. Record it so nobody orders from them blind again.',color:'var(--bad)',canDecide:true,canAccept:false};
+  if (out) return {title:`Reject: ${out} of ${filled} readings out of tolerance`,detail:'The sheet is not the thickness you paid for. Don\'t machine it.',color:'var(--bad)',canDecide:filled===5,canAccept:false};
+  if (bad) return {title:'Fix the readings',detail:'One or more readings is not a number.',color:'var(--warn)',canDecide:false,canAccept:false};
+  if (filled<5) return {title:`${filled} of 5 readings entered`,detail:'Measure across the sheet: corners and centre.',color:'var(--muted)',canDecide:false,canAccept:false};
+  const missing=[]; if(!c.marked) missing.push('no grade marking'); if(!c.mtcMatch) missing.push('MTC not matched'); if(!c.visual) missing.push('visual check not done');
+  if (c.test!=='pass') missing.push('not tested yet');
+  if (missing.length) return {title:'Thickness OK, but not proven',detail:'Still open: '+missing.join(', ')+'. Accepting now repeats the last mistake.',color:'var(--warn)',canDecide:true,canAccept:true};
+  return {title:'Accept: all checks passed',detail:'This seller gets a pass on their record.',color:'var(--ok)',canDecide:true,canAccept:true};
+}
+
+/* ---------- render: sellers ---------- */
+function renderSellers(){
+  const q = (view.sq||'').toLowerCase();
+  const list = state.sellers.filter(s=>!q || (s.name+s.city+s.source+s.phone).toLowerCase().includes(q))
+    .map(s=>({s,st:sellerStats(s.id)}))
+    .sort((a,b)=> (b.st.passed-b.st.failed) - (a.st.passed-a.st.failed) || (b.st.replied - a.st.replied));
+  return `
+  <div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">Sellers</h2></div>
+  <p class="small muted" style="margin-top:-6px">Built from your own purchases. A star rating tells you a seller shipped. This tells you whether the metal passed.</p>
+  <input id="seller-search" placeholder="Search name, city, source" value="${esc(view.sq||'')}" style="margin-bottom:12px">
+  ${list.length ? list.map(({s,st})=>`<div class="card" style="padding:12px 14px;margin-bottom:8px">
+    <div class="row"><b class="grow">${esc(s.name)}</b><span class="small muted">last reply: ${st.lastReply?fmtDate(st.lastReply):'never'}</span></div>
+    <div class="small muted" style="margin:2px 0 6px">${esc(s.source)}${s.city?' · '+esc(s.city):''} · <span class="mono">${esc(s.phone)}</span></div>
+    <div>${sellerBadges(s.id)}</div></div>`).join('') : `<div class="card empty">${q?'No seller matches that search.':'No sellers yet. They get added when you ask for quotes on a purchase.'}</div>`}`;
+}
+
+/* ---------- modal ---------- */
+function confirmModal(title, body, okLabel, onOk, danger){
+  const root=document.getElementById('modal-root');
+  root.innerHTML = `<div class="modal-bg"><div class="modal"><h3>${title}</h3><div class="small" style="margin-bottom:14px">${body}</div>
+   <div class="row" style="justify-content:flex-end"><button class="btn plain" id="m-cancel">Cancel</button><button class="btn ${danger?'danger':''}" id="m-ok">${okLabel}</button></div></div></div>`;
+  document.getElementById('m-cancel').onclick=()=>root.innerHTML='';
+  document.getElementById('m-ok').onclick=()=>{root.innerHTML=''; onOk();};
+}
+
+/* ---------- main render + events ---------- */
+function render(){
+  const app=document.getElementById('app');
+  document.getElementById('nav-orders').classList.toggle('on', view.page!=='sellers');
+  document.getElementById('nav-sellers').classList.toggle('on', view.page==='sellers');
+  if (view.page==='sellers') app.innerHTML = renderSellers();
+  else if (view.page==='new') app.innerHTML = specForm(view.draft,true);
+  else if (view.page==='order') app.innerHTML = renderOrder();
+  else app.innerHTML = renderOrders();
+  bind();
+}
+
+function bind(){
+  const $ = id => document.getElementById(id);
+  const on = (id,fn)=>{ const el=$(id); if(el) el.onclick=fn; };
+  const o = view.page==='order' ? state.orders.find(x=>x.id===view.orderId) : null;
+
+  // orders list
+  document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{ view={page:'order',orderId:el.dataset.open,step:null}; render(); });
+  on('new-order', ()=>{ view={page:'new', draft:{title:'',material:'Aluminium sheet',grade:'6061',temper:'T6',thickness:'',tol:'0.1',size:'',qty:'',needBy:'',pay:'Pay after inspection',mtc:true}}; render(); });
+  const cs=$('clear-sample'); if(cs) cs.onclick=(e)=>{ e.preventDefault(); confirmModal('Start empty?','This removes the sample purchases and sellers.','Start empty',()=>{ state={seeded:false,sellers:[],orders:[]}; save(); render(); },true); };
+
+  // spec form (new or edit)
+  if ($('f-material')){
+    const refresh = ()=>{ const f=readSpecForm(); $('f-grade-other').style.display=f.grade==='Other'?'':'none'; $('f-temper-other').style.display=f.temper==='Other'?'':'none'; renderRisks(f); };
+    $('f-material').onchange = ()=>{
+      const f=readSpecForm(); const m=MATERIALS[f.material];
+      $('f-grade').innerHTML = m.grades.map(x=>`<option>${esc(x)}</option>`).join('');
+      $('f-temper').innerHTML = m.tempers.map(x=>`<option>${esc(x)}</option>`).join('');
+      refresh();
+    };
+    ['f-temper','f-pay','f-mtc','f-grade'].forEach(id=>$(id).onchange=refresh);
+    $('f-temper-other').oninput=refresh;
+    refresh();
+    on('cancel-new', ()=>{ view={page:'orders'}; render(); });
+    on('save-spec', ()=>{
+      const f=readSpecForm(); const e=validateSpec(f);
+      ['title','thickness','tol'].forEach(k=>{ $('e-'+k).textContent=e[k]||''; $('f-'+k).classList.toggle('err',!!e[k]); });
+      $('e-grade').textContent=e.grade||''; $('f-grade-other').classList.toggle('err',!!e.grade);
+      if (Object.keys(e).length) return;
+      if (view.page==='new'){
+        const n={id:uid(),...f,createdAt:today(),status:'inquiry',chosen:null,quotes:[],check:null};
+        state.orders.unshift(n); save();
+        view={page:'order',orderId:n.id,step:'inquiry'}; render(); toast('Spec saved');
+      } else {
+        Object.assign(o,f); save(); view.step='inquiry'; render(); toast('Spec updated');
+      }
+    });
+  }
+
+  if (o){
+    on('back', ()=>{ view={page:'orders'}; render(); });
+    on('del-order', ()=>confirmModal('Delete this purchase?','Seller history from this purchase will also be removed.','Delete',()=>{ state.orders=state.orders.filter(x=>x.id!==o.id); save(); view={page:'orders'}; render(); },true));
+    document.querySelectorAll('[data-step]').forEach(el=>el.onclick=()=>{ const k=el.dataset.step; if(!stepState(o)[k]){ toast('Choose a seller first'); return; } view.step=k; render(); });
+    document.querySelectorAll('[data-step-link]').forEach(el=>el.onclick=(e)=>{ e.preventDefault(); view.step=el.dataset.stepLink; render(); });
+
+    // inquiry
+    on('copy-msg', async ()=>{ const t=buildMessage(o); try{ await navigator.clipboard.writeText(t); toast('Message copied'); } catch(e){ const r=document.createRange(); r.selectNodeContents($('msg')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected. Press Ctrl/Cmd+C'); } });
+    document.querySelectorAll('[data-q]').forEach(el=>{
+      const i=+el.dataset.q, k=el.dataset.k;
+      if (el.type==='checkbox') el.onchange=()=>{ o.quotes[i][k]=el.checked; if(k!=='responded' && el.checked) o.quotes[i].responded=true; save(); render(); };
+      else el.oninput=()=>{ o.quotes[i][k]=el.value.replace(/[^\d]/g,''); if(el.value!==o.quotes[i][k]) el.value=o.quotes[i][k]; save(); };
+    });
+    document.querySelectorAll('[data-remove-q]').forEach(el=>el.onclick=()=>{ const q=o.quotes[+el.dataset.removeQ]; if(o.chosen===q.sellerId){ o.chosen=null; o.status='inquiry'; o.check=null; } o.quotes.splice(+el.dataset.removeQ,1); save(); render(); });
+    document.querySelectorAll('[data-choose]').forEach(el=>el.onclick=()=>{
+      const id=el.dataset.choose; const q=o.quotes.find(x=>x.sellerId===id); const s=sellerById(id); const st=sellerStats(id);
+      const warn=[]; if(!q.specOk) warn.push('has not confirmed grade & temper in writing'); if(o.mtc && !q.mtcShared) warn.push('has not sent the MTC'); if(st.failed) warn.push(`failed ${st.failed} batch${st.failed>1?'es':''} for you before`);
+      const go=()=>{ o.chosen=id; o.status='check'; o.check={readings:['','','','',''],marked:false,mtcMatch:false,visual:false,test:'pending',outcome:null,note:''}; save(); view.step='check'; render(); toast('Seller chosen. Check the batch when it arrives'); };
+      if (warn.length) confirmModal('Choose '+esc(s.name)+'?', 'This seller '+warn.map(esc).join(', and ')+'. That is how the last bad batch got through.', 'Choose anyway', go, true);
+      else go();
+    });
+    on('add-existing', ()=>{ const id=$('pick-seller').value; if(!id) return; o.quotes.push({sellerId:id,sentAt:today(),responded:false,specOk:false,mtcShared:false,price:'',lead:''}); save(); render(); });
+    on('add-new', ()=>{
+      const name=$('n-name').value.trim(), phone=$('n-phone').value.trim();
+      if (!name || !validPhone(phone)){ $('e-new').textContent = !name ? 'Enter the seller name.' : 'Enter a valid 10-digit Indian mobile number.'; return; }
+      const dup = state.sellers.find(s=>digits(s.phone).slice(-10)===digits(phone).slice(-10));
+      if (dup){
+        if (o.quotes.some(q=>q.sellerId===dup.id)){ $('e-new').textContent = `That number is already on this purchase as ${dup.name}.`; return; }
+        o.quotes.push({sellerId:dup.id,sentAt:today(),responded:false,specOk:false,mtcShared:false,price:'',lead:''}); save(); render(); toast(`Already known as ${dup.name}. Added with their history`); return;
+      }
+      const s={id:uid(),name,phone,source:$('n-source').value,city:$('n-city').value.trim(),addedAt:today()};
+      state.sellers.push(s); o.quotes.push({sellerId:s.id,sentAt:today(),responded:false,specOk:false,mtcShared:false,price:'',lead:''}); save(); render();
+    });
+
+    // check
+    document.querySelectorAll('[data-read]').forEach(el=>{
+      el.onchange=()=>{ o.check.readings[+el.dataset.read]=el.value.trim(); save(); render(); };
+    });
+    document.querySelectorAll('[data-c]').forEach(el=>{
+      const k=el.dataset.c;
+      if (el.type==='checkbox') el.onchange=()=>{ o.check[k]=el.checked; save(); render(); };
+      else if (el.tagName==='SELECT') el.onchange=()=>{ o.check[k]=el.value; save(); render(); };
+      else el.onchange=()=>{ o.check[k]=el.value; save(); };
+    });
+    const decide = outcome => { o.check.outcome=outcome; o.check.decidedAt=today(); o.status='done'; save(); render(); toast(outcome==='accepted'?'Batch accepted. Seller record updated':'Batch rejected. Seller record updated'); };
+    on('reject', ()=>confirmModal('Reject this batch?','It will be recorded against this seller.','Reject',()=>decide('rejected'),true));
+    on('accept', ()=>{ const v=verdict(o,o.check); if (v.title.startsWith('Accept')) decide('accepted'); else confirmModal('Accept without full proof?', esc(v.detail), 'Accept anyway', ()=>decide('accepted'), true); });
+    on('reopen', ()=>{ o.status='check'; o.check.outcome=null; save(); render(); });
+  }
+
+  // sellers
+  const ssr=$('seller-search'); if(ssr){ ssr.oninput=()=>{ view.sq=ssr.value; const pos=ssr.selectionStart; render(); const n=$('seller-search'); n.focus(); n.setSelectionRange(pos,pos); }; }
+}
+
+document.getElementById('nav-orders').onclick=()=>{ view={page:'orders'}; render(); };
+document.getElementById('nav-sellers').onclick=()=>{ view={page:'sellers'}; render(); };
+render();
+</script>
+</body>
+</html>

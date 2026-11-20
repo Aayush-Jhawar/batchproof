@@ -1,0 +1,198 @@
+[
+ {
+  "id": "C1",
+  "scenario": "Evaluator opens app cold",
+  "expected": "Sample banner, 1 open purchase, closed rejected batch visible",
+  "pass": true,
+  "actual": "This app is loaded with sample data based on our team's aluminium sheet order. Seller names and numbers are made up. Try: open \"Floor pan sheet \u2013 replacement\", compare the quotes, choose a seller, the"
+ },
+ {
+  "id": "C2",
+  "scenario": "Buyer writes spec the way the team did last time (no temper, no MTC, full advance)",
+  "expected": "All 3 risks flagged before saving",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "C3",
+  "scenario": "Buyer fixes the spec",
+  "expected": "Shows 'Spec is tight'",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "C4",
+  "scenario": "Generated seller message",
+  "expected": "Message has grade-temper, thickness \u00b1 tol, MTC-before-dispatch, pay after inspection",
+  "pass": true,
+  "actual": "Hello, we need the following material. Please confirm each point in writing before we place the order.\n\nMaterial: Aluminium sheet\nGrade: 6061-T6\nTemper: T6\nThickness: 1.5 mm (tolerance \u00b10.1 mm)\nSize: \u2014\nQuantity: \u2014\n\nPlease share the mill test certificate (MTC) for this exact batch BEFORE dispatch. We"
+ },
+ {
+  "id": "C5",
+  "scenario": "Add a new seller and open WhatsApp",
+  "expected": "wa.me link with 91 prefix and prefilled message",
+  "pass": true,
+  "actual": "https://wa.me/919876543210?text=Hello%2C%20we%20need%20the%20following%20materia"
+ },
+ {
+  "id": "C6",
+  "scenario": "Choose a seller who hasn't confirmed spec or sent MTC",
+  "expected": "In-page warning naming both gaps",
+  "pass": true,
+  "actual": "Choose Test Metals?\nThis seller has not confirmed grade & temper in writing, and has not sent the MTC. That is how the last bad batch got through.\nCancel\nChoose anyway"
+ },
+ {
+  "id": "C7",
+  "scenario": "Batch arrives, one point measures 1.31 mm on a 1.5 \u00b1 0.1 spec",
+  "expected": "Verdict = reject, 1 of 5 out; Accept disabled",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "C8",
+  "scenario": "Reject batch, then look at Sellers",
+  "expected": "Test Metals shows 'Failed 1 batch'",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "C9",
+  "scenario": "Next purchase: picking a known seller",
+  "expected": "Dropdown marks sellers who failed before",
+  "pass": true,
+  "actual": "Shree Metals (sample) \u2013 failed before\nGanga Alloys (sample)\nNational Aluminium Traders (sample)\nPatel Sheet House (sample)\nTest Metals \u2013 failed before"
+ },
+ {
+  "id": "C10",
+  "scenario": "Seller who never replies twice",
+  "expected": "Flagged 'number may be dead'",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E1",
+  "scenario": "Start empty",
+  "expected": "Empty state message, no sample banner",
+  "pass": true,
+  "actual": "Purchases\n+ New purchase\nNo open purchases.\nStart one when someone on the team needs material."
+ },
+ {
+  "id": "E1b",
+  "scenario": "Empty sellers page",
+  "expected": "Helpful empty message",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E2",
+  "scenario": "Save spec with blank name, 'abc' thickness, negative tolerance",
+  "expected": "Blocked with 3 field errors",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E3",
+  "scenario": "Thickness typed with comma (2,5)",
+  "expected": "Accepted as 2.5",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E4",
+  "scenario": "Invalid phone, then same number added twice in different formats",
+  "expected": "Rejects bad number; detects duplicate",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E5",
+  "scenario": "Jump to 'Check delivery' before choosing a seller",
+  "expected": "Blocked; stays on step 2",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E6",
+  "scenario": "Reading typed as 'two'",
+  "expected": "Field marked, cannot decide",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E7",
+  "scenario": "Reload page mid-purchase",
+  "expected": "Purchases still there",
+  "pass": true,
+  "actual": "Purchases\n+ New purchase\nComma test\nAluminium sheet \u00b7 6061-T6 \u00b7 2,5 mm \u00b7\nWaiting for delivery check"
+ },
+ {
+  "id": "E8",
+  "scenario": "300 sellers, 100 purchases; search sellers",
+  "expected": "Renders and filters in < 2 s",
+  "pass": true,
+  "actual": "0.08s"
+ },
+ {
+  "id": "E9",
+  "scenario": "Name contains HTML/script",
+  "expected": "Shown as text, nothing executes",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E10",
+  "scenario": "Browser blocks storage",
+  "expected": "App still loads with sample data, no crash",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "C11",
+  "scenario": "Compare 3 quotes on the replacement order",
+  "expected": "Recommends National (spec+MTC) over cheaper Patel (no MTC) and says why",
+  "pass": true,
+  "actual": "Compare\nSafest quote: National Aluminium Traders (sample), \u20b910400, 4 days. Spec confirmed, MTC sent, no failures on record. Patel Sheet House (sample) is \u20b9800 cheaper but hasn't sent the MTC.\nSELLER\tREPLIED\tSPEC\tMTC\t\u20b9\tDAYS\nGanga Alloys (sample)\tNo\tNo\tNo\t\u2014\t\u2014\nNational Aluminium Traders (sample)\tYes\tYe"
+ },
+ {
+  "id": "E13",
+  "scenario": "Open spec of a closed (rejected) purchase",
+  "expected": "Spec is read-only",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E15",
+  "scenario": "Sellers page on a 390px phone",
+  "expected": "No horizontal overflow",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E11",
+  "scenario": "Grade not in the list ('Other')",
+  "expected": "Blocks blank 'Other'; typed grade/temper appear in message",
+  "pass": true,
+  "actual": "Hello, we need the following material. Please confirm each point in writing before we place the order.\n\nMaterial: Steel tube (CDS/ERW)\nGrade: AISI 304-Annealed\n"
+ },
+ {
+  "id": "E14",
+  "scenario": "Seller asked today, no reply yet",
+  "expected": "Not flagged as dead number",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "E12",
+  "scenario": "Readings exactly on the tolerance limit (1.0 \u00b1 0.1 \u2192 0.9 / 1.1)",
+  "expected": "Counted as in tolerance, not 'Out'",
+  "pass": true,
+  "actual": ""
+ },
+ {
+  "id": "JS",
+  "scenario": "No uncaught JS errors or native dialogs during run",
+  "expected": "0 errors",
+  "pass": true,
+  "actual": ""
+ }
+]
